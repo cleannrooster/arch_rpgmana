@@ -1,0 +1,24 @@
+{
+	"required": true,
+	"package": "com.cleannrooster.rpgmana.mixin",
+	"compatibilityLevel": "JAVA_17",
+	"mixins": [
+		"LivingEntityMixin",
+		"SpellCastMixin",
+		"ItemstackMixin",
+		"SpellcostMixin",
+		"BrewingRecipeRegistryMixin",
+		"ManaComponentMixin",
+		"LivingEntityMindovermatterMixin",
+		"SpellRegistryMixin",
+		"ManaBoostMixin"
+
+	],
+	"client": [
+		"SpellTooltipMixin"
+
+	],
+	"injectors": {
+		"defaultRequire": 1
+	}
+}
