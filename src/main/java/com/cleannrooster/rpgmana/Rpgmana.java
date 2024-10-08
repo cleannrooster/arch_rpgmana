@@ -16,6 +16,7 @@ import com.cleannrooster.rpgmana.loot.Default;
 import com.cleannrooster.rpgmana.loot.LootConfig;
 import com.cleannrooster.rpgmana.loot.LootHelper;
 import com.cleannrooster.rpgmana.mixin.BrewingRecipeRegistryMixin;
+import com.cleannrooster.rpgmana.network.ConfigSync;
 import me.shedaniel.autoconfig.AutoConfig;
 import me.shedaniel.autoconfig.serializer.JanksonConfigSerializer;
 import me.shedaniel.autoconfig.serializer.PartitioningSerializer;
@@ -23,6 +24,8 @@ import net.fabricmc.api.ModInitializer;
 
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.loot.v2.LootTableEvents;
+import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentTarget;
 import net.minecraft.entity.EquipmentSlot;
@@ -32,6 +35,7 @@ import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectCategory;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.Potions;
 import net.minecraft.registry.Registries;
@@ -87,6 +91,7 @@ public class Rpgmana implements ModInitializer {
 
 	public static ServerConfig config;
 	public static ClientConfig clientConfig	;
+	private static PacketByteBuf configSerialized = PacketByteBufs.create();
 
 	public static final ClampedEntityAttribute MANA = new ClampedEntityAttribute("attribute.name.rpgmana.mana", 0,0,999999);
 	public static final ClampedEntityAttribute MANAREGEN = new ClampedEntityAttribute("attribute.name.rpgmana.manaregen", 4,-999999,999999);
@@ -122,7 +127,12 @@ public class Rpgmana implements ModInitializer {
 		AutoConfig.register(ClientConfigWrapper.class, PartitioningSerializer.wrap(JanksonConfigSerializer::new));
 
 		config = AutoConfig.getConfigHolder(ServerConfigWrapper.class).getConfig().server;
+		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
+			sender.sendPacket(ConfigSync.ID, configSerialized);
+		});
 		clientConfig = AutoConfig.getConfigHolder(ClientConfigWrapper.class).getConfig().client;
+		configSerialized = ConfigSync.write(config);
+
 		if(clientConfig.disableArchonMana){
 			Archon.CONFIG.mana_yoffset=-9001;
 		}

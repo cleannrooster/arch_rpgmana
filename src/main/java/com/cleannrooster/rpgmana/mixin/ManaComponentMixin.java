@@ -43,10 +43,7 @@ public class ManaComponentMixin {
     private void getMaxManaRPG(CallbackInfoReturnable<Integer> info) {
         info.setReturnValue((int) ((ManaInterface)player).getMaxMana());
     }
-    @Inject(at = @At("HEAD"), method = "getRegenSpeed", remap = false,cancellable = true)
-    private void getRegenSpeed( CallbackInfoReturnable<Integer> info) {
-        info.setReturnValue(0);
-    }
+
     @Overwrite(remap = false)
     public void removeMana(int amount) {
         ((ManaInterface)player).spendMana(-amount);
